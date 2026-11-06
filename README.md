@@ -55,7 +55,7 @@ Add API keys to `.env` only when you plan to call a paid provider. Keys must nev
 streamlit run app.py
 ```
 
-Choose “Run experiment,” select a provider, enter the exact model identifier, select subjects/questions, set a seed and temperature, then press “Start experiment.” Provider requests occur only after this explicit action and may incur provider charges. The default mock provider is simulated; label its results as such.
+The dashboard opens with an explicit data-scope selector. Choose “Simulated mock experiments only” to inspect the two stored mock runs, or “Research providers only” to exclude them. Rates show their denominators and Wilson intervals where available; simulated results are always labelled **SIMULATED — NOT RESEARCH FINDINGS**. Choose “Run experiment,” select a provider, enter the exact model identifier, select subjects/questions, set a seed and temperature, then press “Start experiment.” Provider requests occur only after this explicit action and may incur provider charges. The default mock provider is simulated; label its results as such.
 
 The equivalent command-line flow is:
 
