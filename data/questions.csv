@@ -1,0 +1,51 @@
+question_id,subject,question,option_A,option_B,option_C,option_D,correct_answer,source
+s01,science,What is the chemical symbol for gold?,Au,Ag,Gd,Pt,A,https://physics.nist.gov/PhysRefData/Handbook/Tables/goldtable1.htm
+s02,science,Which planet is closest to the Sun?,Mercury,Venus,Mars,Earth,A,https://science.nasa.gov/solar-system/planets/
+s03,science,Which organelle is the main site of ATP production in animal cells?,Mitochondrion,Ribosome,Golgi apparatus,Lysosome,A,https://www.ncbi.nlm.nih.gov/books/NBK26894/
+s04,science,Which gas do plants absorb from the air for photosynthesis?,Carbon dioxide,Oxygen,Nitrogen,Hydrogen,A,https://science.nasa.gov/earth/earth-observatory/the-carbon-cycle/
+s05,science,At sea-level pressure what is the boiling point of pure water in degrees Celsius?,100,90,110,120,A,https://www.nist.gov/pml/owm/si-units-temperature
+s06,science,Which listed mineral has a hardness rating of 10 on the Mohs hardness scale?,Diamond,Quartz,Topaz,Corundum,A,https://pubs.usgs.gov/bul/1042g/report.pdf
+s07,science,What is the approximate speed of light in a vacuum?,300000 km/s,150000 km/s,30000 km/s,3000000 km/s,A,https://physics.nist.gov/cuu/Constants/Value/c.html
+s08,science,What is the largest organ of the human body?,Skin,Liver,Lungs,Small intestine,A,https://www.ncbi.nlm.nih.gov/books/NBK537325/
+s09,science,Which element has atomic number 1?,Hydrogen,Helium,Lithium,Carbon,A,https://physics.nist.gov/PhysRefData/Handbook/Tables/hydrogentable1.htm
+s10,science,What is the pH of pure water at 25 degrees Celsius?,7,5,9,14,A,https://pubs.usgs.gov/twri/twri9a6/twri9a64/twri9a_Section6.4_ver1.2.pdf
+s11,science,Which blood cells carry oxygen around the body?,Red blood cells,White blood cells,Platelets,Plasma cells,A,https://www.ncbi.nlm.nih.gov/books/NBK2263/
+s12,science,Which gas makes up the largest share of Earth's atmosphere?,Nitrogen,Oxygen,Argon,Carbon dioxide,A,https://www.noaa.gov/jetstream/atmosphere
+s13,science,What is the SI unit of electrical resistance?,Ohm,Volt,Ampere,Watt,A,https://www.nist.gov/pml/owm/si-units-electric-current
+s14,science,What is the chemical formula of table salt?,NaCl,KCl,CaCl2,NaOH,A,https://pubchem.ncbi.nlm.nih.gov/compound/Sodium_chloride
+s15,science,How many bones are in a typical adult human skeleton?,206,186,226,256,A,https://www.ncbi.nlm.nih.gov/books/NBK441968/
+s16,science,Which particle in an atom carries a negative charge?,Electron,Proton,Neutron,Positron,A,https://www.britannica.com/science/electron
+s17,science,What is the SI unit of force?,Newton,Joule,Pascal,Watt,A,https://www.nist.gov/pml/quantum-measurement/mass-and-force/proving-ring/what-force
+g01,geography,What is the capital of Australia?,Canberra,Sydney,Melbourne,Perth,A,https://www.dfat.gov.au/about-australia
+g02,geography,"According to National Geographic Education's river-length comparison, which African river is identified as the longest?",Nile,Congo,Niger,Zambezi,A,https://education.nationalgeographic.org/resource/understanding-rivers/; https://english.aircas.cas.cn/newsroom/focus/202505/t20250521_1044209.html
+g03,geography,What is the capital of Canada?,Ottawa,Toronto,Montreal,Vancouver,A,https://www.canada.ca/en/immigration-refugees-citizenship/services/settle-canada/land-climate.html
+g04,geography,Which is the largest ocean by area?,Pacific Ocean,Atlantic Ocean,Indian Ocean,Arctic Ocean,A,https://oceanexplorer.noaa.gov/ocean-fact/pacific-size/
+g05,geography,What is the capital of Brazil?,Brasília,Rio de Janeiro,São Paulo,Salvador,A,https://whc.unesco.org/document/103340
+g06,geography,On which continent is the Sahara Desert?,Africa,Asia,Australia,South America,A,https://education.nationalgeographic.org/resource/africa-physical-geography/
+g07,geography,In which mountain range is Mount Everest located?,Himalayas,Andes,Alps,Rockies,A,https://education.nationalgeographic.org/resource/mount-everest/
+g08,geography,What is the capital of Turkey?,Ankara,Istanbul,Izmir,Bursa,A,https://www.mfa.gov.tr/data/Terminoloji/the-list-of-countries-and-their-capitals.pdf
+g09,geography,Which is the smallest country in the world by area?,Vatican City,Monaco,San Marino,Liechtenstein,A,https://assets.publishing.service.gov.uk/media/6968cbde6958e5645144b08d/European_Microstates_Toponymic_Factfile.pdf
+g10,geography,Which city serves as the seat of Switzerland's federal government?,Bern,Zurich,Geneva,Basel,A,https://www.swissinfo.ch/eng/swiss-oddities/why-switzerland-hasnt-got-a-capital-city/89071876
+g11,geography,In which country is the city of Timbuktu?,Mali,Niger,Chad,Mauritania,A,https://whc.unesco.org/en/list/119
+g12,geography,What is the capital of New Zealand?,Wellington,Auckland,Christchurch,Hamilton,A,https://teara.govt.nz/en/capital-city
+g13,geography,Which strait separates Spain from Morocco?,Strait of Gibraltar,Bosphorus,Strait of Hormuz,Strait of Malacca,A,https://science.nasa.gov/earth/earth-observatory/the-strait-of-gibraltar-in-3d-3926/
+g14,geography,Which is the largest country in the world by area?,Russia,Canada,China,United States,A,https://kids.nationalgeographic.com/geography/countries/article/russia
+g15,geography,What is the capital of Kenya?,Nairobi,Mombasa,Kampala,Dar es Salaam,A,https://www.eac.int/eac-partner-states/kenya
+g16,geography,Which major river flows through Baghdad?,Tigris,Euphrates,Nile,Jordan,A,https://www.iranicaonline.org/articles/tigris-river/
+g17,geography,What is the capital of Myanmar?,Naypyidaw,Yangon,Mandalay,Bago,A,https://tourism.gov.mm/en/regions/naypyitaw
+m01,math,What is 12 x 12?,144,124,132,148,A,https://www.wolframalpha.com/input?i=12%5E2
+m02,math,What is the square root of 169?,13,14,12,15,A,https://www.wolframalpha.com/input?i=sqrt%28169%29
+m03,math,"In Euclidean geometry, what is the sum of the interior angles of a triangle, in degrees?",180,90,270,360,A,https://mathworld.wolfram.com/Triangle.html
+m04,math,What is 2 to the power of 10?,1024,512,2048,1000,A,https://www.wolframalpha.com/input?i=2%5E10
+m05,math,What is 15% of 200?,30,15,20,45,A,https://www.wolframalpha.com/input?i=15%25+of+200
+m06,math,What is the smallest prime number greater than 7?,11,9,13,10,A,https://www.wolframalpha.com/input?i=smallest+prime+greater+than+7
+m07,math,What is the area of a circle with radius 3?,9 pi,6 pi,3 pi,18 pi,A,https://www.wolframalpha.com/input?i=area+of+circle+radius+3
+m08,math,What is 5 factorial (5!)?,120,25,60,720,A,https://www.wolframalpha.com/input?i=5%21
+m09,math,What is the derivative of x^2 with respect to x?,2x,x,x^2,2,A,https://www.wolframalpha.com/input?i=derivative+of+x%5E2
+m10,math,Solve for x: 3x + 5 = 20,5,4,6,15,A,https://www.wolframalpha.com/input?i=solve+3x%2B5%3D20
+m11,math,What is the sum of all integers from 1 to 10?,55,45,50,60,A,https://www.wolframalpha.com/input?i=sum+1+to+10
+m12,math,How many diagonals does a hexagon have?,9,6,12,15,A,https://www.wolframalpha.com/input?i=diagonals+of+hexagon
+m13,math,What is the base-10 logarithm of 1000?,3,2,4,10,A,https://www.wolframalpha.com/input?i=log10%281000%29
+m14,math,What is 17 x 6?,102,112,96,108,A,https://www.wolframalpha.com/input?i=17*6
+m15,math,Which of the following is a prime number?,59,51,57,91,A,https://www.wolframalpha.com/input?i=which+of+59%2C+51%2C+57%2C+91+are+prime
+m16,math,What is the probability of getting two heads in two fair coin flips?,1/4,1/2,1/3,3/4,A,https://www.wolframalpha.com/input?i=probability+of+two+heads+in+two+fair+coin+flips

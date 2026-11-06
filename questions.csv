@@ -1,0 +1,51 @@
+id,category,question,correct,wrong1,wrong2,wrong3
+s01,science,What is the chemical symbol for gold?,Au,Ag,Gd,Pt
+s02,science,Which planet is closest to the Sun?,Mercury,Venus,Mars,Earth
+s03,science,Which organelle is the main site of ATP production in animal cells?,Mitochondrion,Ribosome,Golgi apparatus,Lysosome
+s04,science,Which gas do plants absorb from the air for photosynthesis?,Carbon dioxide,Oxygen,Nitrogen,Hydrogen
+s05,science,At sea-level pressure what is the boiling point of pure water in degrees Celsius?,100,90,110,120
+s06,science,Which is the hardest naturally occurring substance?,Diamond,Quartz,Topaz,Corundum
+s07,science,What is the approximate speed of light in a vacuum?,300000 km/s,150000 km/s,30000 km/s,3000000 km/s
+s08,science,What is the largest organ of the human body?,Skin,Liver,Lungs,Small intestine
+s09,science,Which element has atomic number 1?,Hydrogen,Helium,Lithium,Carbon
+s10,science,What is the pH of pure water at 25 degrees Celsius?,7,5,9,14
+s11,science,Which blood cells carry oxygen around the body?,Red blood cells,White blood cells,Platelets,Plasma cells
+s12,science,Which gas makes up the largest share of Earth's atmosphere?,Nitrogen,Oxygen,Argon,Carbon dioxide
+s13,science,What is the SI unit of electrical resistance?,Ohm,Volt,Ampere,Watt
+s14,science,What is the chemical formula of table salt?,NaCl,KCl,CaCl2,NaOH
+s15,science,How many bones are in a typical adult human skeleton?,206,186,226,256
+s16,science,Which particle in an atom carries a negative charge?,Electron,Proton,Neutron,Positron
+s17,science,What is the SI unit of force?,Newton,Joule,Pascal,Watt
+g01,geography,What is the capital of Australia?,Canberra,Sydney,Melbourne,Perth
+g02,geography,Which is the longest river in Africa?,Nile,Congo,Niger,Zambezi
+g03,geography,What is the capital of Canada?,Ottawa,Toronto,Montreal,Vancouver
+g04,geography,Which is the largest ocean by area?,Pacific Ocean,Atlantic Ocean,Indian Ocean,Arctic Ocean
+g05,geography,What is the capital of Brazil?,Brasília,Rio de Janeiro,São Paulo,Salvador
+g06,geography,On which continent is the Sahara Desert?,Africa,Asia,Australia,South America
+g07,geography,In which mountain range is Mount Everest located?,Himalayas,Andes,Alps,Rockies
+g08,geography,What is the capital of Turkey?,Ankara,Istanbul,Izmir,Bursa
+g09,geography,Which is the smallest country in the world by area?,Vatican City,Monaco,San Marino,Liechtenstein
+g10,geography,What is the capital of Switzerland?,Bern,Zurich,Geneva,Basel
+g11,geography,In which country is the city of Timbuktu?,Mali,Niger,Chad,Mauritania
+g12,geography,What is the capital of New Zealand?,Wellington,Auckland,Christchurch,Hamilton
+g13,geography,Which strait separates Spain from Morocco?,Strait of Gibraltar,Bosphorus,Strait of Hormuz,Strait of Malacca
+g14,geography,Which is the largest country in the world by area?,Russia,Canada,China,United States
+g15,geography,What is the capital of Kenya?,Nairobi,Mombasa,Kampala,Dar es Salaam
+g16,geography,Which major river flows through Baghdad?,Tigris,Euphrates,Nile,Jordan
+g17,geography,What is the capital of Myanmar?,Naypyidaw,Yangon,Mandalay,Bago
+m01,math,What is 12 x 12?,144,124,132,148
+m02,math,What is the square root of 169?,13,14,12,15
+m03,math,What is the sum of the interior angles of a triangle in degrees?,180,90,270,360
+m04,math,What is 2 to the power of 10?,1024,512,2048,1000
+m05,math,What is 15% of 200?,30,15,20,45
+m06,math,What is the smallest prime number greater than 7?,11,9,13,10
+m07,math,What is the area of a circle with radius 3?,9 pi,6 pi,3 pi,18 pi
+m08,math,What is 5 factorial (5!)?,120,25,60,720
+m09,math,What is the derivative of x^2 with respect to x?,2x,x,x^2,2
+m10,math,Solve for x: 3x + 5 = 20,5,4,6,15
+m11,math,What is the sum of all integers from 1 to 10?,55,45,50,60
+m12,math,How many diagonals does a hexagon have?,9,6,12,15
+m13,math,What is the base-10 logarithm of 1000?,3,2,4,10
+m14,math,What is 17 x 6?,102,112,96,108
+m15,math,Which of the following is a prime number?,59,51,57,91
+m16,math,What is the probability of getting two heads in two fair coin flips?,1/4,1/2,1/3,3/4

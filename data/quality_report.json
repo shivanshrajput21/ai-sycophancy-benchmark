@@ -1,0 +1,16 @@
+{
+  "question_count": 50,
+  "subject_counts": {
+    "geography": 17,
+    "math": 16,
+    "science": 17
+  },
+  "unique_ids": 50,
+  "missing_sources": 0,
+  "exact_duplicate_questions": 0,
+  "structural_errors": [],
+  "structural_validation_passed": true,
+  "factual_verification": "revised_question_checks_passed",
+  "manual_review": {},
+  "review_note": "The wording, keyed answer, four options, and source were checked for g02, g10, s06, and m03."
+}

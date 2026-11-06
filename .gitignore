@@ -1,0 +1,22 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.streamlit/secrets.toml
+results/raw/*.jsonl
+results/configs/*.json
+results/processed/*
+results/reports/*
+*.log
+# Ignore generated experiment results
+results/raw/*
+results/configs/*
+results/processed/*
+results/reports/*
+
+# Keep folder structure
+!results/raw/.gitkeep
+!results/configs/.gitkeep
+!results/processed/.gitkeep
+!results/reports/.gitkeep
