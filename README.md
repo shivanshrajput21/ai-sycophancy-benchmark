@@ -57,6 +57,12 @@ streamlit run app.py
 
 The dashboard opens with an explicit data-scope selector. Choose “Simulated mock experiments only” to inspect the two stored mock runs, or “Research providers only” to exclude them. Rates show their denominators and Wilson intervals where available; simulated results are always labelled **SIMULATED — NOT RESEARCH FINDINGS**. Choose “Run experiment,” select a provider, enter the exact model identifier, select subjects/questions, set a seed and temperature, then press “Start experiment.” Provider requests occur only after this explicit action and may incur provider charges. The default mock provider is simulated; label its results as such.
 
+Use “Dataset Explorer & Selection” to search and filter the full dataset, choose a reproducible question count, preview the selected questions, and run an isolated mock benchmark with **Run Benchmark with Selected Questions**. The generated experiment configuration, raw results, and analysis report are added to Experiment history without changing the source CSV or previous experiments.
+
+Additional dashboard pages provide stored-response inspection, read-only dataset quality checks, subject-wise metrics, separate evidence-correction status (runs remain unavailable until verified evidence excerpts are supplied), repeated mock trials, and Markdown/CSV/PDF research report exports. Evidence correction records use a distinct `experiment_type` and are never mixed with false-suggestion metrics.
+
+The **Experiment Design Studio** adds a saved-template workflow under `results/templates/`. It supports reproducible question selection, standard or validated custom challenge prompts, mock-only execution, separate repetitions, immutable configuration snapshots, and configuration-only template comparison. Template deletion never removes completed experiment results.
+
 The equivalent command-line flow is:
 
 ```powershell

@@ -1,7 +1,7 @@
 import re
 import pandas as pd
 
-from src.benchmark.experiment_runner import run_experiment
+from src.benchmark.experiment_runner import run_evidence_correction_experiment, run_experiment
 from src.benchmark.result_manager import ResultManager
 from src.providers.base import ModelResponse
 
@@ -75,3 +75,22 @@ def test_runner_records_final_provider_failure(tmp_path, monkeypatch):
     rows = manager.read()
     assert len(rows) == 6
     assert sum(row["stage"] == "initial" and row["status"] == "completed" for row in rows) == 1
+
+
+def test_evidence_runner_marks_unavailable_evidence_without_fabricating(tmp_path):
+    frame = pd.DataFrame([{"question_id": "q1", "subject": "science", "question": "Q?",
+        "option_A": "correct", "option_B": "wrong", "option_C": "wrong2", "option_D": "wrong3", "correct_answer": "A"}])
+    manager = ResultManager(tmp_path / "evidence.jsonl")
+    run_evidence_correction_experiment(
+        frame,
+        CorrectProvider(),
+        "test",
+        manager,
+        "exp",
+        {},
+    )
+    rows = manager.read()
+    assert len(rows) == 1
+    assert rows[0]["experiment_type"] == "evidence_correction"
+    assert rows[0]["status"] == "unavailable"
+    assert rows[0]["evidence"] is None

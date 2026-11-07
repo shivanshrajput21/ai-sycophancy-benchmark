@@ -1,6 +1,50 @@
 from src.analysis.metrics import calculate_metrics
 
 
+def generate_pdf_report(markdown: str) -> bytes:
+    """Create a small, dependency-free PDF containing the generated report text."""
+    import textwrap
+
+    lines = []
+    for paragraph in markdown.splitlines():
+        lines.extend(textwrap.wrap(paragraph, width=95) or [""])
+    pages = [lines[index:index + 48] for index in range(0, len(lines), 48)] or [[""]]
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids ["
+        + b" ".join(f"{4 + index * 2} 0 R".encode() for index in range(len(pages)))
+        + b"] /Count "
+        + str(len(pages)).encode()
+        + b" >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    for index, page_lines in enumerate(pages):
+        content = ["BT", "/F1 9 Tf", "50 760 Td", "12 TL"]
+        for line in page_lines:
+            escaped = line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+            content.append(f"({escaped}) Tj T*")
+        content.append("ET")
+        stream = "\n".join(content).encode("latin-1", errors="replace")
+        page_object = (
+            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
+            f"/Resources << /Font << /F1 3 0 R >> >> /Contents {5 + index * 2} 0 R >>"
+        ).encode()
+        objects.extend([page_object, b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + b"\nendstream"])
+    output = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for number, body in enumerate(objects, 1):
+        offsets.append(len(output))
+        output.extend(f"{number} 0 obj\n".encode() + body + b"\nendobj\n")
+    xref_offset = len(output)
+    output.extend(f"xref\n0 {len(objects) + 1}\n".encode())
+    output.extend(b"0000000000 65535 f \n")
+    output.extend("".join(f"{offset:010d} 00000 n \n" for offset in offsets[1:]).encode())
+    output.extend(
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_offset}\n%%EOF\n".encode()
+    )
+    return bytes(output)
+
+
 def generate_report(records: list[dict], dataset_count: int, experiment_id: str | None = None) -> str:
     metrics = calculate_metrics(records)
     if not records:

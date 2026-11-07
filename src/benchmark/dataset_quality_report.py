@@ -66,12 +66,48 @@ def _review_revised_questions(frame: pd.DataFrame) -> dict[str, str]:
 def build_quality_report(frame: pd.DataFrame) -> dict:
     errors = validate_dataset(frame)
     manual_review = _review_revised_questions(frame)
+    option_columns = [f"option_{letter}" for letter in "ABCD"]
+    missing_options = (
+        int(frame[option_columns].apply(lambda column: column.astype(str).str.strip().eq("")).any(axis=1).sum())
+        if set(option_columns).issubset(frame.columns)
+        else len(frame)
+    )
+    duplicate_options = (
+        int(
+            frame[option_columns]
+            .apply(lambda row: len({str(value).strip().casefold() for value in row}) < 4, axis=1)
+            .sum()
+        )
+        if set(option_columns).issubset(frame.columns)
+        else len(frame)
+    )
+    missing_answers = (
+        int(frame["correct_answer"].astype(str).str.strip().eq("").sum())
+        if "correct_answer" in frame
+        else len(frame)
+    )
+    invalid_subjects = (
+        int((~frame["subject"].astype(str).str.casefold().isin({"geography", "science", "math"})).sum())
+        if "subject" in frame
+        else len(frame)
+    )
+    short_questions = (
+        int(frame["question"].astype(str).str.split().str.len().lt(5).sum())
+        if "question" in frame
+        else len(frame)
+    )
     return {
         "question_count": len(frame),
         "subject_counts": frame["subject"].value_counts().sort_index().to_dict() if "subject" in frame else {},
         "unique_ids": int(frame["question_id"].nunique()) if "question_id" in frame else 0,
         "missing_sources": int(frame["source"].fillna("").astype(str).str.strip().eq("").sum()) if "source" in frame else len(frame),
         "exact_duplicate_questions": int(frame["question"].astype(str).str.strip().str.casefold().duplicated().sum()) if "question" in frame else None,
+        "duplicate_ids": int(frame["question_id"].duplicated().sum()) if "question_id" in frame else len(frame),
+        "missing_answers": missing_answers,
+        "missing_options": missing_options,
+        "duplicate_options": duplicate_options,
+        "invalid_subjects": invalid_subjects,
+        "short_questions": short_questions,
         "structural_errors": errors,
         "structural_validation_passed": not errors,
         "factual_verification": "revised_question_checks_passed" if not manual_review else "manual_review_required",

@@ -14,6 +14,16 @@ class ExperimentConfig(BaseModel):
     temperature: float = 0.0
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     dataset_path: str = "data/questions.csv"
+    experiment_type: str = "false_suggestion"
+    experiment_name: str = ""
+    description: str = ""
+    question_order: list[str] = []
+    conditions: list[str] = []
+    custom_conditions: dict[str, dict] = {}
+    prompt_templates: dict[str, str] = {}
+    randomize_question_order: bool = True
+    template_id: str | None = None
+    dataset_fingerprint: str | None = None
 
     def save(self, directory: Path) -> Path:
         directory.mkdir(parents=True, exist_ok=True)

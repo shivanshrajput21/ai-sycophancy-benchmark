@@ -6,6 +6,7 @@ RESULTS_DIR = ROOT / "results"
 RAW_DIR = RESULTS_DIR / "raw"
 PROCESSED_DIR = RESULTS_DIR / "processed"
 REPORTS_DIR = RESULTS_DIR / "reports"
+TEMPLATES_DIR = RESULTS_DIR / "templates"
 DEFAULT_MODELS = {
     "openai": ["gpt-6-luna", "gpt-6.1-sol", "gpt-6.1-terra"],
     "anthropic": ["claude-sonnet-5", "claude-opus-5", "claude-haiku-4-5-20251001"],

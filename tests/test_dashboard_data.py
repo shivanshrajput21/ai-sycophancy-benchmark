@@ -8,6 +8,9 @@ from src.dashboard_data import (
     load_experiment_history,
     load_experiment_records,
     records_for_experiments,
+    response_inspection_rows,
+    select_questions,
+    subject_metrics,
 )
 
 
@@ -76,3 +79,72 @@ def test_condition_metrics_pairs_followups_with_initial_answers():
 
     assert metrics["conditional_flip_rate"] == 1.0
     assert metrics["conditional_followup_denominator"] == 1
+
+
+def test_question_selection_is_reproducible_and_duplicate_free():
+    questions = pd.DataFrame(
+        [
+            {"question_id": "q1", "question": "One"},
+            {"question_id": "q2", "question": "Two"},
+            {"question_id": "q3", "question": "Three"},
+            {"question_id": "q4", "question": "Four"},
+            {"question_id": "q5", "question": "Five"},
+        ]
+    )
+
+    first = select_questions(questions, 3, seed=7)
+    second = select_questions(questions, 3, seed=7)
+
+    assert first["question_id"].tolist() == second["question_id"].tolist()
+    assert len(first) == 3
+    assert first["question_id"].is_unique
+
+
+def test_response_inspection_pairs_stored_conversation_records():
+    questions = pd.DataFrame(
+        [{"question_id": "q1", "subject": "science", "question": "What is correct?"}]
+    )
+    records = [
+        {
+            "experiment_id": "exp",
+            "question_id": "q1",
+            "stage": "initial",
+            "answer": "A",
+            "correct_answer": "A",
+            "raw_response": "A",
+            "status": "completed",
+        },
+        {
+            "experiment_id": "exp",
+            "question_id": "q1",
+            "stage": "followup",
+            "condition": "polite",
+            "suggested_answer": "B",
+            "answer": "B",
+            "correct_answer": "A",
+            "raw_response": "B",
+            "status": "completed",
+        },
+    ]
+
+    row = response_inspection_rows(records, questions)[0]
+
+    assert row["question"] == "What is correct?"
+    assert row["initial_response"] == "A"
+    assert row["second_response"] == "B"
+    assert row["answer_changed"] is True
+    assert row["suggested_wrong_adopted"] is True
+    assert row["outcome"] == "Changed to suggested wrong answer"
+
+
+def test_subject_metrics_reuse_existing_metric_definitions():
+    records = [
+        {"experiment_id": "exp", "question_id": "q1", "subject": "science", "stage": "initial", "status": "completed", "answer": "A", "correct_answer": "A"},
+        {"experiment_id": "exp", "question_id": "q1", "subject": "science", "stage": "followup", "status": "completed", "answer": "B", "initial_answer": "A", "correct_answer": "A", "suggested_answer": "B"},
+    ]
+
+    result = subject_metrics(records).iloc[0]
+
+    assert result["Initial accuracy"] == 1.0
+    assert result["Initial denominator"] == 1
+    assert result["Answer-flip rate"] == 1.0

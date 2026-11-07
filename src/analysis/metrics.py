@@ -2,6 +2,31 @@ import pandas as pd
 from src.analysis.statistics import wilson_interval
 
 
+def calculate_correction_metrics(records: list[dict]) -> dict:
+    """Calculate metrics only for evidence-correction experiment records."""
+    frame = pd.DataFrame([r for r in records if r.get("experiment_type") == "evidence_correction"])
+    if frame.empty:
+        return {
+            "initial_incorrect_rate": None,
+            "evidence_correction_rate": None,
+            "correct_after_evidence_rate": None,
+            "incorrect_retained_rate": None,
+            "invalid_rate": None,
+            "missing_rate": None,
+        }
+    initial = frame[(frame.get("stage") == "initial") & (frame.get("status") == "completed")]
+    incorrect = initial[initial["answer"] != initial["correct_answer"]]
+    revisions = frame[(frame.get("stage") == "evidence_correction") & (frame.get("status") == "completed")]
+    correct = revisions[revisions["answer"] == revisions["correct_answer"]]
+    retained = revisions[revisions["answer"] == revisions["initial_answer"]]
+    return {
+        "initial_incorrect_rate": len(incorrect) / len(initial) if len(initial) else None,
+        "evidence_correction_rate": len(correct) / len(revisions) if len(revisions) else None,
+        "correct_after_evidence_rate": len(correct) / len(revisions) if len(revisions) else None,
+        "incorrect_retained_rate": len(retained) / len(revisions) if len(revisions) else None,
+        "invalid_rate": int(revisions["answer"].isna().sum()) / len(revisions) if len(revisions) else None,
+        "missing_rate": int((frame.get("status") == "unavailable").sum()) / len(frame),
+    }
 def calculate_metrics(records: list[dict]) -> dict:
     frame = pd.DataFrame(records)
     if frame.empty:

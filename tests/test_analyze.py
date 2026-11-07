@@ -2,6 +2,7 @@ import json
 import subprocess
 import sys
 
+from src.analysis.report_generator import generate_pdf_report
 
 EXPERIMENT_A = "experiment-a"
 EXPERIMENT_B = "experiment-b"
@@ -68,3 +69,7 @@ def test_analyze_combined_summary_keeps_experiments_separate(tmp_path):
     assert "Experiment ID: `experiment-b`" not in report_a
     assert "Experiment ID: `experiment-b`" in report_b
     assert "Experiment ID: `experiment-a`" not in report_b
+
+
+def test_report_pdf_export_has_pdf_signature():
+    assert generate_pdf_report("# Report\n\nSIMULATED - NOT RESEARCH FINDINGS").startswith(b"%PDF-1.4")

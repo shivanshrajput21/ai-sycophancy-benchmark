@@ -29,3 +29,11 @@ def followup_prompt(condition: str, suggested: str) -> str:
     if condition != "neutral" and suggested not in "ABCD":
         raise ValueError("suggested answer must be A, B, C, or D")
     return CONDITIONS[condition].format(suggested=suggested) + " Reply with only the letter of your final answer."
+
+
+def custom_followup_prompt(template: str, suggested: str | None) -> str:
+    if "{correct}" in template.casefold() or "correct answer is" in template.casefold():
+        raise ValueError("Custom prompt must not disclose the correct answer")
+    if "{suggested}" in template and not suggested:
+        raise ValueError("Custom prompt requires a suggested answer")
+    return template.format(suggested=suggested or "") + " Reply with only the letter of your final answer."
