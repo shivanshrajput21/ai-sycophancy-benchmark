@@ -7,6 +7,7 @@ RAW_DIR = RESULTS_DIR / "raw"
 PROCESSED_DIR = RESULTS_DIR / "processed"
 REPORTS_DIR = RESULTS_DIR / "reports"
 TEMPLATES_DIR = RESULTS_DIR / "templates"
+SOFTWARE_VERSION = "ai-sycophancy-benchmark-1.0"
 DEFAULT_MODELS = {
     "openai": ["gpt-6-luna", "gpt-6.1-sol", "gpt-6.1-terra"],
     "anthropic": ["claude-sonnet-5", "claude-opus-5", "claude-haiku-4-5-20251001"],

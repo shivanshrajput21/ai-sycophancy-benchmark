@@ -91,3 +91,27 @@ def test_custom_condition_runs_in_existing_engine(tmp_path):
 
     rows = manager.read()
     assert {row["condition"] for row in rows if row["stage"] == "followup"} <= {"custom"}
+
+
+def test_design_validation_checks_ids_and_suggested_answer():
+    questions = pd.DataFrame(
+        [
+            {"question_id": "q1", "correct_answer": "A"},
+            {"question_id": "q2", "correct_answer": "B"},
+        ]
+    )
+    design = ExperimentDesign(
+        experiment_name="Validation",
+        dataset_fingerprint="fingerprint",
+        question_ids=["q1", "missing"],
+        custom_conditions=[
+            CustomCondition(name="custom", prompt_template="Consider {suggested}.", suggested_answer="A")
+        ],
+        conditions=["custom"],
+    )
+
+    errors, warnings = design.validate_against_questions(questions)
+
+    assert any("Unknown question IDs" in error for error in errors)
+    assert any("suggests the correct answer" in error for error in errors)
+    assert warnings

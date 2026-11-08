@@ -22,7 +22,7 @@ from src.config.experiment_design import (
     load_templates,
     randomized_question_ids,
 )
-from src.config.settings import DATA_PATH, DEFAULT_MODELS, RAW_DIR, REPORTS_DIR, RESULTS_DIR, TEMPLATES_DIR
+from src.config.settings import DATA_PATH, DEFAULT_MODELS, RAW_DIR, REPORTS_DIR, RESULTS_DIR, SOFTWARE_VERSION, TEMPLATES_DIR
 from src.dashboard_data import (
     CONDITION_LABELS,
     condition_metrics,
@@ -360,6 +360,126 @@ def render_repeated_trials(questions: pd.DataFrame) -> None:
         st.caption("Repeated responses may vary in real providers; these mock trials are isolated and not research findings.")
 
 
+def render_reproduce_experiment(questions: pd.DataFrame) -> None:
+    st.header("Reproduce Experiment")
+    st.caption("Recreates the saved setup and conditions. It does not guarantee identical outputs for nondeterministic providers.")
+    config_paths = sorted((RESULTS_DIR / "configs").glob("*.json")) if (RESULTS_DIR / "configs").exists() else []
+    if not config_paths:
+        st.info("No saved experiment configurations are available.")
+        return
+    selected_path = st.selectbox("Saved experiment configuration", config_paths, format_func=lambda path: path.stem)
+    try:
+        original = ExperimentConfig.model_validate_json(selected_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        st.error(f"Could not load configuration: {exc}")
+        return
+    current_fingerprint = dataset_fingerprint(DATA_PATH) if DATA_PATH.exists() else None
+    differences = [
+        {"Setting": "Dataset fingerprint", "Original": original.dataset_fingerprint or "N/A", "Current": current_fingerprint or "Missing"},
+        {"Setting": "Question count", "Original": len(original.question_ids), "Current": len(questions)},
+        {"Setting": "Question order", "Original": ", ".join(original.question_order or original.question_ids), "Current": "Loaded from current dataset"},
+        {"Setting": "Conditions", "Original": ", ".join(original.conditions or ["standard defaults"]), "Current": "Saved configuration"},
+        {"Setting": "Provider / model", "Original": f"{original.provider} / {original.model}", "Current": "mock / mock-deterministic"},
+    ]
+    st.dataframe(pd.DataFrame(differences), use_container_width=True, hide_index=True)
+    if original.dataset_fingerprint and current_fingerprint != original.dataset_fingerprint:
+        st.warning("The current dataset fingerprint differs from the original. Reproduction setup may not be comparable.")
+    confirm = st.checkbox("I confirm this creates a new isolated experiment from the saved setup.")
+    if st.button("Reproduce Experiment", type="primary", disabled=not confirm):
+        question_ids = original.question_order or original.question_ids
+        missing = sorted(set(question_ids) - set(questions["question_id"]))
+        if missing:
+            st.error("Saved question IDs are unavailable in the current dataset: " + ", ".join(missing))
+            return
+        target = questions.set_index("question_id").loc[question_ids].reset_index()
+        new_config = ExperimentConfig(
+            provider="mock",
+            model="mock-deterministic",
+            question_ids=question_ids,
+            question_order=question_ids,
+            random_seed=original.random_seed,
+            temperature=original.temperature,
+            experiment_type=original.experiment_type,
+            experiment_name=original.experiment_name,
+            description=original.description,
+            conditions=original.conditions,
+            custom_conditions=original.custom_conditions,
+            prompt_templates=original.prompt_templates,
+            randomize_question_order=False,
+            dataset_path=original.dataset_path,
+            dataset_fingerprint=current_fingerprint,
+            dataset_version=(current_fingerprint or "")[:12],
+            software_version=SOFTWARE_VERSION,
+            reproduced_from_experiment_id=original.experiment_id,
+        )
+        new_config.save(RESULTS_DIR / "configs")
+        manager = ResultManager(RAW_DIR / f"{new_config.experiment_id}.jsonl")
+        run_experiment(
+            target,
+            MockProvider(),
+            new_config.model,
+            manager,
+            new_config.experiment_id,
+            new_config.random_seed,
+            new_config.temperature,
+            conditions=new_config.conditions or None,
+            custom_conditions=new_config.custom_conditions,
+            randomize_question_order=False,
+            run_metadata={
+                "experiment_type": new_config.experiment_type,
+                "dataset_fingerprint": current_fingerprint,
+                "dataset_version": (current_fingerprint or "")[:12],
+                "question_order": question_ids,
+                "challenge_conditions": new_config.conditions,
+                "software_version": SOFTWARE_VERSION,
+                "reproduced_from_experiment_id": original.experiment_id,
+            },
+        )
+        st.success(f"Reproduction completed as {new_config.experiment_id}. Outputs are not claimed identical.")
+
+
+def render_methodology(questions: pd.DataFrame) -> None:
+    st.header("Research Methodology & Limitations")
+    st.markdown(
+        f"""
+### Research objective
+Measure whether a model changes an initially correct multiple-choice answer after disagreement, and distinguish suggested-answer adoption from other answer changes.
+
+### Research questions
+- How often are initially correct answers retained after each challenge condition?
+- How often is a user's suggested wrong answer adopted?
+- How do outcomes vary by subject, model, and condition?
+
+### Dataset composition
+The current dataset contains **{len(questions)} questions** across {questions["subject"].nunique()} subjects. It is a small multiple-choice dataset covering Geography, Mathematics, and Science.
+
+### Question verification
+Questions are loaded and structurally validated for unique IDs, four distinct options, non-empty text, and valid answer keys. Source URLs are retained for review; structural validation is not independent factual verification.
+
+### Experimental design
+Each question receives an initial prompt. Follow-up challenges are sent only after a completed initially correct answer. Question and option order can be seeded and recorded. Results are append-only JSONL files with immutable configuration snapshots.
+
+### Challenge conditions
+Neutral asks the model to double-check without a suggestion. Polite, confident, and expert conditions present the same seeded incorrect suggestion for a question.
+
+### Evaluation methodology
+Derived classification distinguishes retained correct answers, suggested-wrong adoption, another incorrect answer, recovered correctness, invalid output, and missing output. Raw response text is preserved.
+
+### Metric and statistical methods
+Rates include explicit numerators and denominators. Proportion intervals use 95% Wilson intervals. No statistical significance is claimed; repeated responses may be correlated and small samples create substantial uncertainty.
+
+### Research limitations
+- Mock-provider results are simulated and are not real model findings.
+- The dataset has only 50 questions and limited subject coverage.
+- Small samples create substantial statistical uncertainty.
+- Repeated model responses may vary.
+- Answer changes alone do not establish sycophancy.
+- Initial accuracy determines which questions receive follow-up challenges.
+- Findings should not automatically generalize to all models or domains.
+"""
+    )
+
+
 def render_experiment_design_studio(questions: pd.DataFrame) -> None:
     st.header("Experiment Design Studio")
     st.caption("Design, preview, save, and explicitly launch isolated mock experiments.")
@@ -511,7 +631,10 @@ def render_experiment_design_studio(questions: pd.DataFrame) -> None:
     prompt_templates = {condition: CONDITIONS[condition] for condition in selected_conditions}
     prompt_templates.update({condition.name: condition.prompt_template for condition in custom_conditions})
     preview_config = None
+    validation_warnings = []
     try:
+        if not DATA_PATH.exists():
+            raise ValueError(f"Dataset file does not exist: {DATA_PATH}")
         preview_config = ExperimentDesign(
             template_id=st.session_state.get("studio_template_id", None) or ExperimentDesign(
                 experiment_name="temporary", dataset_fingerprint="preview", question_ids=["preview"]
@@ -531,7 +654,7 @@ def render_experiment_design_studio(questions: pd.DataFrame) -> None:
             randomize_question_order=randomize,
             timeout_seconds=int(timeout) if timeout else None,
         )
-        validation_errors = preview_config.validate_for_execution()
+        validation_errors, validation_warnings = preview_config.validate_against_questions(questions)
         validation_errors.extend(custom_condition_errors)
     except ValueError as exc:
         preview_config = None
@@ -563,6 +686,8 @@ def render_experiment_design_studio(questions: pd.DataFrame) -> None:
     if validation_errors:
         for error in validation_errors:
             st.error(error)
+    for warning in validation_warnings:
+        st.warning(warning)
     if preview_config and not validation_errors and st.button("Save Experiment Template"):
         preview_config.save(TEMPLATES_DIR)
         st.success(f"Template saved: {preview_config.template_id}")
@@ -610,6 +735,18 @@ def render_experiment_design_studio(questions: pd.DataFrame) -> None:
                     conditions=condition_names,
                     custom_conditions=custom_map,
                     randomize_question_order=False,
+                    run_metadata={
+                        "experiment_type": experiment_type,
+                        "experiment_name": name,
+                        "dataset_fingerprint": preview_config.dataset_fingerprint,
+                        "dataset_version": preview_config.dataset_fingerprint[:12],
+                        "question_order": ordered_ids,
+                        "challenge_conditions": condition_names,
+                        "random_seed": repetition_seed,
+                        "software_version": SOFTWARE_VERSION,
+                        "repetition_number": repetition + 1,
+                        "template_id": preview_config.template_id,
+                    },
                 )
                 records = manager.read()
                 report_path = REPORTS_DIR / f"{config.experiment_id}.md"
@@ -905,7 +1042,7 @@ selected_scope = "All experiments (explicitly include simulated)" if scope.start
 available_ids = filter_experiment_ids(history, selected_scope)
 selected_ids = st.sidebar.multiselect("Experiments", available_ids, default=available_ids)
 records = records_for_experiments(records_by_experiment, selected_ids)
-page = st.sidebar.radio("Navigate", ["Overview", "Condition analysis", "Model comparison", "Dataset Explorer & Selection", "Dataset Quality Analyzer", "Subject Analysis", "Response Inspector", "Evidence-Based Correction", "Experiment Design Studio", "Experiment history", "Run experiment", "Repeated Trials", "Research Report Generator"])
+page = st.sidebar.radio("Navigate", ["Overview", "Condition analysis", "Model comparison", "Dataset Explorer & Selection", "Dataset Quality Analyzer", "Subject Analysis", "Response Inspector", "Evidence-Based Correction", "Experiment Design Studio", "Reproduce Experiment", "Research Methodology & Limitations", "Experiment history", "Run experiment", "Repeated Trials", "Research Report Generator"])
 
 if page == "Overview":
     render_overview(records, selected_ids, questions)
@@ -928,6 +1065,10 @@ elif page == "Evidence-Based Correction":
     render_evidence_correction(questions)
 elif page == "Experiment Design Studio":
     render_experiment_design_studio(questions)
+elif page == "Reproduce Experiment":
+    render_reproduce_experiment(questions)
+elif page == "Research Methodology & Limitations":
+    render_methodology(questions)
 elif page == "Repeated Trials":
     render_repeated_trials(questions)
 elif page == "Experiment history":

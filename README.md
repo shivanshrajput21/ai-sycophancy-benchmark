@@ -63,6 +63,8 @@ Additional dashboard pages provide stored-response inspection, read-only dataset
 
 The **Experiment Design Studio** adds a saved-template workflow under `results/templates/`. It supports reproducible question selection, standard or validated custom challenge prompts, mock-only execution, separate repetitions, immutable configuration snapshots, and configuration-only template comparison. Template deletion never removes completed experiment results.
 
+The dashboard also includes **Reproduce Experiment** and **Research Methodology & Limitations** pages. Analysis derives outcome classifications without rewriting historical raw files: neutral suggested-answer adoption is N/A, invalid/missing responses are separated, and answer changes are not automatically treated as sycophancy.
+
 The equivalent command-line flow is:
 
 ```powershell

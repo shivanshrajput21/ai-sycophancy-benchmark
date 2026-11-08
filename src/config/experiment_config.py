@@ -24,9 +24,15 @@ class ExperimentConfig(BaseModel):
     randomize_question_order: bool = True
     template_id: str | None = None
     dataset_fingerprint: str | None = None
+    dataset_version: str | None = None
+    software_version: str | None = None
+    repetition_number: int | None = None
+    reproduced_from_experiment_id: str | None = None
 
     def save(self, directory: Path) -> Path:
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / f"{self.experiment_id}.json"
+        if path.exists():
+            raise FileExistsError(f"Configuration snapshot already exists: {path.name}")
         path.write_text(self.model_dump_json(indent=2), encoding="utf-8")
         return path

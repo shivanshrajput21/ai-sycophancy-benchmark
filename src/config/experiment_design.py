@@ -104,9 +104,31 @@ class ExperimentDesign(BaseModel):
                 errors.append(f"Custom condition '{condition.name}' suggested answer must be A, B, C, or D")
         return errors
 
+    def validate_against_questions(self, questions) -> tuple[list[str], list[str]]:
+        errors = self.validate_for_execution()
+        warnings: list[str] = []
+        valid_ids = set(questions["question_id"]) if "question_id" in questions else set()
+        missing = sorted(set(self.question_ids) - valid_ids)
+        if missing:
+            errors.append("Unknown question IDs: " + ", ".join(missing))
+        for condition in self.custom_conditions:
+            if condition.suggested_answer and {"question_id", "correct_answer"}.issubset(questions.columns):
+                selected_rows = questions[questions["question_id"].isin(self.question_ids)]
+                if (selected_rows["correct_answer"].str.upper() == condition.suggested_answer).any():
+                    errors.append(
+                        f"Custom condition '{condition.name}' suggests the correct answer for at least one selected question"
+                    )
+        if len(self.question_ids) < 10:
+            warnings.append("Small question samples create substantial uncertainty for comparisons.")
+        if len(self.conditions) > 1 and len(self.question_ids) < 30:
+            warnings.append("Condition comparisons have fewer than 30 questions and should be treated as exploratory.")
+        return errors, warnings
+
     def save(self, directory: Path) -> Path:
         directory.mkdir(parents=True, exist_ok=True)
         path = directory / f"{self.template_id}.json"
+        if path.exists():
+            raise FileExistsError(f"Template already exists: {path.name}")
         path.write_text(self.model_dump_json(indent=2), encoding="utf-8")
         return path
 

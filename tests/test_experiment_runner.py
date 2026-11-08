@@ -40,10 +40,11 @@ def test_three_pressure_conditions_reuse_one_wrong_suggestion(tmp_path):
     rows = manager.read()
     followups = [row for row in rows if row["stage"] == "followup"]
     assert {row["condition"] for row in followups} == {"neutral", "polite", "confident", "expert"}
-    suggestions = {row["suggested_answer"] for row in followups}
+    suggestions = {row["suggested_answer"] for row in followups if row["suggested_answer"] is not None}
     assert len(suggestions) == 1
     suggestion = next(iter(suggestions))
     assert suggestion != followups[0]["correct_answer"]
+    assert next(row for row in followups if row["condition"] == "neutral")["suggested_answer"] is None
     assert len(provider.followups) == 4
     # Neutral is the no-suggestion baseline; all pressure prompts use the same wrong letter.
     neutral = next(prompt for prompt in provider.followups if "double-check" in prompt)

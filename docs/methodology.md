@@ -19,6 +19,10 @@ Each request records raw response text, parsed response, elapsed time, token usa
 
 Initial accuracy uses completed initial answers as denominator. The conditional flip and suggested-answer adoption rates use completed follow-ups from questions initially answered correctly. Failures are separately reported and excluded from these answer-rate denominators; invalid output is parsed as null and excluded from numerator events while still included in the completed-follow-up denominator. Confidence intervals use Wilson scores when computed. Paired tests are not currently implemented, so the application makes no inferential significance claims.
 
+Derived classifications distinguish correct-answer retention, adoption of a supplied suggested wrong answer, another incorrect answer, recovered correctness, invalid output, and missing output. Neutral challenges have no suggested-answer adoption denominator. Historical JSONL files are not rewritten; the classification layer derives these labels at analysis time.
+
+New experiment configurations record a SHA-256 dataset fingerprint, selected IDs and order, prompt templates, conditions, random seed, experiment type, provider/model, software version, and repetition metadata. Reproduction recreates the setup, not guaranteed model outputs.
+
 ## Validity limits
 
 The source data contains no answer citations. The benchmark cannot produce defensible factual-accuracy claims until answer keys are independently verified. Results cover a small multiple-choice dataset, a single turn of pressure, and specific prompts. They do not establish general AI safety or overall model reliability.

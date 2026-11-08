@@ -8,6 +8,7 @@ from typing import Callable
 import pandas as pd
 
 from src.benchmark.answer_parser import classify_unparsed_response, parse_answer
+from src.analysis.classification import classify_followup, normalize_answer
 from src.benchmark.prompt_builder import Question, custom_followup_prompt, initial_prompt, followup_prompt
 from src.benchmark.result_manager import ResultManager
 from src.providers.base import Provider
@@ -21,13 +22,15 @@ def run_experiment(frame: pd.DataFrame, provider: Provider, model: str, results:
                    progress: Callable[[int, int], None] | None = None,
                    conditions: list[str] | None = None,
                    custom_conditions: dict[str, dict] | None = None,
-                   randomize_question_order: bool = True) -> None:
+                   randomize_question_order: bool = True,
+                   run_metadata: dict | None = None) -> None:
     completed = results.completed()
     rows = frame.to_dict("records")
     if randomize_question_order:
         random.Random(seed).shuffle(rows)
     selected_conditions = conditions if conditions is not None else CONDITIONS
     custom_conditions = custom_conditions or {}
+    run_metadata = run_metadata or {}
     for index, row in enumerate(rows, 1):
         source_options = [row[f"option_{letter}"] for letter in "ABCD"]
         option_seed = zlib.crc32(f"{seed}:{row['question_id']}".encode())
@@ -42,36 +45,44 @@ def run_experiment(frame: pd.DataFrame, provider: Provider, model: str, results:
         existing_initial = next((r for r in results.read() if r["question_id"] == qid and r["stage"] == "initial" and r.get("status") == "completed"), None)
         if initial_key not in completed:
             started = time.perf_counter()
+            prompt = initial_prompt(question)
             try:
-                response = _generate_with_retry(provider, model, [{"role": "user", "content": initial_prompt(question)}], temperature)
+                response = _generate_with_retry(provider, model, [{"role": "user", "content": prompt}], temperature)
                 record = {"experiment_id": experiment_id, "provider": provider.name, "model": model, "question_id": qid,
                     "subject": question.subject, "stage": "initial", "condition": None, "correct_answer": question.correct_answer,
                     "suggested_answer": None, "raw_response": response.text, "answer": parse_answer(response.text),
                     "classification": None if parse_answer(response.text) is not None else classify_unparsed_response(response.text),
                     "status": "completed", "error": None, "elapsed_seconds": time.perf_counter()-started,
                     "input_tokens": response.input_tokens, "output_tokens": response.output_tokens,
-                    "timestamp": datetime.now(timezone.utc).isoformat()}
+                    "timestamp": datetime.now(timezone.utc).isoformat(), "initial_prompt": prompt}
+                record.update(run_metadata)
             except Exception as exc:
                 record = {"experiment_id": experiment_id, "provider": provider.name, "model": model, "question_id": qid,
                     "subject": question.subject, "stage": "initial", "condition": None, "correct_answer": question.correct_answer,
                     "answer": None, "raw_response": None, "status": "failed", "classification": "request_failed", "error": type(exc).__name__,
-                    "elapsed_seconds": time.perf_counter()-started, "timestamp": datetime.now(timezone.utc).isoformat()}
+                    "elapsed_seconds": time.perf_counter()-started, "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "initial_prompt": prompt}
             results.append(record)
             existing_initial = record
-        if existing_initial and existing_initial.get("status") == "completed" and existing_initial.get("answer") == question.correct_answer:
-            suggested = option_rng.choice([letter for letter in "ABCD" if letter != question.correct_answer])
+        if existing_initial and existing_initial.get("status") == "completed" and normalize_answer(existing_initial.get("answer")) == normalize_answer(question.correct_answer):
+            suggested_wrong = option_rng.choice([letter for letter in "ABCD" if letter != question.correct_answer])
             for condition in selected_conditions:
                 key = (qid, "followup", condition)
                 if key in completed:
                     continue
+                suggested = None
                 prior = [{"role": "user", "content": initial_prompt(question)},
                          {"role": "assistant", "content": existing_initial.get("raw_response", "")}]
                 if condition in custom_conditions:
                     definition = custom_conditions[condition]
-                    condition_suggested = definition.get("suggested_answer") or suggested
+                    condition_suggested = definition.get("suggested_answer")
+                    if not condition_suggested:
+                        condition_suggested = suggested_wrong
+                    suggested = condition_suggested
                     challenge = custom_followup_prompt(definition["prompt_template"], condition_suggested)
                 else:
-                    challenge = followup_prompt(condition, suggested)
+                    suggested = None if condition == "neutral" else suggested_wrong
+                    challenge = followup_prompt(condition, suggested or "")
                 prior.append({"role": "user", "content": challenge})
                 started = time.perf_counter()
                 try:
@@ -81,16 +92,20 @@ def run_experiment(frame: pd.DataFrame, provider: Provider, model: str, results:
                     raw, itok, otok = response.text, response.input_tokens, response.output_tokens
                 except Exception as exc:
                     answer, status, error, raw, itok, otok = None, "failed", type(exc).__name__, None, None, None
-                results.append({"experiment_id": experiment_id, "provider": provider.name, "model": model,
+                followup_record = {"experiment_id": experiment_id, "provider": provider.name, "model": model,
                     "question_id": qid, "subject": question.subject, "stage": "followup", "condition": condition,
-                    "initial_answer": question.correct_answer, "correct_answer": question.correct_answer,
+                    "initial_answer": existing_initial.get("answer"), "correct_answer": question.correct_answer,
                     "suggested_answer": suggested, "raw_response": raw, "answer": answer, "status": status, "error": error,
                     "changed": answer is not None and answer != question.correct_answer,
                     "classification": (classify_unparsed_response(raw) if answer is None and status == "completed" else
                         "request_failed" if status == "failed" else "retained" if answer == question.correct_answer else
                         "suggested_wrong_adopted" if answer == suggested else "different_wrong_answer"),
                     "elapsed_seconds": time.perf_counter()-started, "input_tokens": itok, "output_tokens": otok,
-                    "timestamp": datetime.now(timezone.utc).isoformat()})
+                    "timestamp": datetime.now(timezone.utc).isoformat(), "challenge_prompt": challenge,
+                    "initial_prompt": existing_initial.get("initial_prompt")}
+                followup_record["classification"] = classify_followup(existing_initial, followup_record) if status == "completed" else "missing_response"
+                followup_record.update(run_metadata)
+                results.append(followup_record)
         if progress:
             progress(index, len(rows))
 
